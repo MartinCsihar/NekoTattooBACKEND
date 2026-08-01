@@ -63,15 +63,15 @@ public class TattooService {
 
         mailService.sendMeMail(smr);
         mailService.sendClientMail(smr);
-        return "CREATE";
+        return "CREATED";
     }
 
     public PriceQuoteRes getPriceQuote(GetPriceQuoteReq req) throws JsonProcessingException {
 
 
-        Integer width = req.getSizeWidth();
-        Integer height = req.getSizeHeight();
-        int area = width * height;
+        Double width = req.getSizeWidth();
+        Double height = req.getSizeHeight();
+        double area = width * height;
         //String sizeCode = sizeCodeFromArea(area);
 
         String prompt = buildPrompt(height, width, area);
@@ -110,7 +110,7 @@ public class TattooService {
 
         return mapper.readValue(content, PriceQuoteRes.class);
     }
-    private  String sizeCodeFromArea(int area) {
+    private  String sizeCodeFromArea(double area) {
         if (area <= 25) return "XS";
         if (area <= 75) return "S";
         if (area <= 150) return "M";
@@ -127,7 +127,7 @@ public class TattooService {
         }
     }
 
-    private String buildPrompt(int height, int width, int area) {
+    private String buildPrompt(double height, double width, double area) {
         return """
                 Elemezd a tetoválás fényképét és a vendég által megadott méreteket (cm).
                 

@@ -8,21 +8,23 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class SendMailReq {
-    public String appId;
-    public String firstName;
-    public String lastName;
-    public MultipartFile tattooRefference;
-    public LocalDate appDate;
-    public LocalTime appTime;
-    public Integer price;
-    public Double height;
-    public Double width;
-    public String phoneNumber;
-    public String email;
+    private String appId;
+    private String firstName;
+    private String lastName;
+    private List<MultipartFile> tattooRefference;
+    private LocalDate appDate;
+    private LocalTime appTime;
+    private Integer price;
+    private Double height;
+    private Double width;
+    private String phoneNumber;
+    private String email;
+    private Boolean uniqueTattoo;
 }

@@ -11,21 +11,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class TattooAppointmentReq {
-    public String email;
-    public String phoneNumber;
-    public String lastName;
-    public String firstName;
-    public LocalDate appointmentDate;
-    public LocalTime appointmentTime;
-    public Double tattooHeight;
-    public Double tattooWidth;
-    public TattooStyle style;
-    public Integer tattooPrice;
-    public MultipartFile tattooRefference;
+    private String email;
+    private String phoneNumber;
+    private String lastName;
+    private String firstName;
+    private LocalDate appointmentDate;
+    private LocalTime appointmentTime;
+    private TattooStyle style;
+    private Integer tattooPrice;
+    private List<MultipartFile> tattooRefferences;
+    private Boolean uniqueTattoo; //When consulation needed
 }

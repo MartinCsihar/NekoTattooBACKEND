@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @Builder
 public class GetPriceQuoteReq {
-    public Double sizeWidth;
-    public Double sizeHeight;
-    public MultipartFile tattooRefference;
+    private Double sizeWidth;
+    private Double sizeHeight;
+    private MultipartFile tattooRefference;
 }

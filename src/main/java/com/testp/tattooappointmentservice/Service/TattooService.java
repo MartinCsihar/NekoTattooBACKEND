@@ -41,8 +41,6 @@ public class TattooService {
                 .firstName(req.getFirstName())
                 .appointmentDate(req.getAppointmentDate())
                 .appointmentTime(req.getAppointmentTime())
-                .tattooHeight(req.getTattooHeight())
-                .tattooWidth(req.getTattooWidth())
                 .style(req.getStyle())
                 .tattooPrice(req.getTattooPrice())
                 .build();
@@ -54,11 +52,12 @@ public class TattooService {
                 .price(req.getTattooPrice())
                 .width(req.getTattooWidth())
                 .height(req.getTattooHeight())
-                .tattooRefference(req.getTattooRefference())
+                .tattooRefference(req.getTattooRefferences())
                 .appDate(req.getAppointmentDate())
                 .appTime(req.getAppointmentTime())
                 .phoneNumber(req.getPhoneNumber())
                 .email(req.getEmail())
+                .uniqueTattoo(req.getUniqueTattoo())
                 .build();
 
         mailService.sendMeMail(smr);

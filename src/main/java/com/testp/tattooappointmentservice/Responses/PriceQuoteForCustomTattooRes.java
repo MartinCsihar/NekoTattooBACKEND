@@ -1,11 +1,15 @@
 package com.testp.tattooappointmentservice.Responses;
 
 import com.testp.tattooappointmentservice.Enums.TattooCategory;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PriceQuoteForCustomTattooRes {
     private Double estimatedWidth;
     private Double estimatedHeight;

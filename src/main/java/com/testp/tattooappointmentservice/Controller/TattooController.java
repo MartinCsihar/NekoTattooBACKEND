@@ -3,6 +3,7 @@ package com.testp.tattooappointmentservice.Controller;
 import com.testp.tattooappointmentservice.Requests.GetPriceQuoteForCustomTattooReq;
 import com.testp.tattooappointmentservice.Requests.GetPriceQuoteReq;
 import com.testp.tattooappointmentservice.Requests.TattooAppointmentReq;
+import com.testp.tattooappointmentservice.Responses.PriceQuoteForCustomTattooRes;
 import com.testp.tattooappointmentservice.Responses.PriceQuoteRes;
 import com.testp.tattooappointmentservice.Service.TattooService;
 import jakarta.servlet.http.Cookie;
@@ -49,35 +50,48 @@ public class TattooController {
                 return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Napi limit elérve!");
             }
             PriceQuoteRes priceQuoteRes = tattooService.getPriceQuote(req);
-            count++;
-            Cookie cookie = new Cookie("price_quote_count", String.valueOf(count));
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setMaxAge(60*60*24);
-            cookie.setSecure(false);
-            response.addCookie(cookie);
+            incrementAndAddCookie(response, count);
 
             return  ResponseEntity.ok(priceQuoteRes);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-//    @PostMapping("/getPriceQuoteForCustomTattoo")
-//    public ResponseEntity<?> getCustomPriceQuote(@ModelAttribute GetPriceQuoteForCustomTattooReq req,
-//                                                 HttpServletRequest request,
-//                                                 HttpServletResponse response){
-//        try{
-//            Cookie[] cookies  = request.getCookies();
-//            int count = 0;
-//            for(Cookie cookie : cookies){
-//                if(cookie.getName().equals("price_quote_count")){
-//                    count = Integer.parseInt(cookie.getValue());
-//                }
-//            }
-//            if(count >= 4){
-//                return new ResponseEntity<>("Napi limit elérve!", HttpStatus.TOO_MANY_REQUESTS);
-//            }
-//
-//        }
-//    }
+
+    private static void incrementAndAddCookie(HttpServletResponse response, int count) {
+        count++;
+        Cookie cookie = new Cookie("price_quote_count", String.valueOf(count));
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(60*60*24);
+        cookie.setSecure(false);
+        response.addCookie(cookie);
+    }
+
+    @GetMapping("/getPriceQuoteForCustomTattoo")
+    public ResponseEntity<?> getCustomPriceQuote(@ModelAttribute GetPriceQuoteForCustomTattooReq req,
+                                                 HttpServletRequest request,
+                                                 HttpServletResponse response){
+        try{
+            Cookie[] cookies  = request.getCookies();
+            int count = 0;
+            if (cookies != null){
+                for(Cookie cookie : cookies){
+                    if(cookie.getName().equals("price_quote_count")){
+                        count = Integer.parseInt(cookie.getValue());
+                    }
+                }
+            }
+            if(count >= 4){
+                return new ResponseEntity<>("Napi limit elérve!", HttpStatus.TOO_MANY_REQUESTS);
+            }
+            PriceQuoteForCustomTattooRes res = tattooService.getPriceQuoteForCustomTattoo(req);
+
+            incrementAndAddCookie(response, count);
+
+            return  ResponseEntity.ok(res);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

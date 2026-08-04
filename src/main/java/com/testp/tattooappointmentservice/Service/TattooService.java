@@ -3,28 +3,25 @@ package com.testp.tattooappointmentservice.Service;
 import com.azure.ai.openai.OpenAIClient;
 import com.azure.ai.openai.models.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.testp.tattooappointmentservice.Models.TattooAppointment;
 import com.testp.tattooappointmentservice.Repository.TattooRepo;
+import com.testp.tattooappointmentservice.Requests.GetPriceQuoteForCustomTattooReq;
 import com.testp.tattooappointmentservice.Requests.GetPriceQuoteReq;
 import com.testp.tattooappointmentservice.Requests.SendMailReq;
 import com.testp.tattooappointmentservice.Requests.TattooAppointmentReq;
+import com.testp.tattooappointmentservice.Responses.PriceQuoteForCustomTattooRes;
 import com.testp.tattooappointmentservice.Responses.PriceQuoteRes;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +70,7 @@ public class TattooService {
         double area = width * height;
         //String sizeCode = sizeCodeFromArea(area);
 
-        String prompt = buildPrompt(height, width, area);
+        String prompt = buildNormalPrompt(height, width, area);
 
         MultipartFile tattooRefference = req.getTattooRefference();
         String base64Image =  toBase64(tattooRefference);
@@ -119,7 +116,7 @@ public class TattooService {
         }
     }
 
-    private String buildPrompt(double height, double width, double area) {
+    private String buildNormalPrompt(double height, double width, double area) {
         return """
                 Elemezd a tetoválás fényképét és a vendég által megadott méreteket (cm).
                 
@@ -265,4 +262,198 @@ public class TattooService {
                 """.formatted(height, width, area);
     }
 
+    private String buildCustomPrompt(String customText, Double width, Double height) {
+        var tattooHeight = height != 0 ? height + " cm" : "Nincs megadva, meg kell becsülni";
+        var tattooWidth = width != 0 ? width + " cm" : "Nincs megadva, meg kell becsülni";
+        return """
+                Az ügyfél egy teljesen egyedileg tervezett tetkót szeretne, ennek érdekében képet/képeket is feltöltött majd írt egy megjegyzést, hogy hogyan tervezte el a designt!
+                Amennyiben az ügyfél megjegzése eltér a témától, irrealisztikus, vagy bármi ilyesmi, amit nem lehet teljesjteni, akkor add vissza a prompt végén lévő JSON-t úgy, 
+                hogy a reason mezőjébe beleírod, hogy nem megfelelő leírás, a többi mezőt pedig nullra állítod!
+                
+                
+                Elemezd a tetoválás képet/képeket és becsüld meg a tetoválás magasságát és szélességét (ha nem adta meg az ügyfél) az ügyfél megjegyzése és a képek alapján!
+                
+                A feladatod: a tetoválás kategorizálása és az ár kiszámítása a következő árlista alapján.
+                Az általad reálisan becsült méretekkel (szélesség, magasság) - az ügyfél megjegyzése alapján - számold ki a területet, majd ez alapján kategorizálj.
+                A számítás során kizárólag a megadott árlistát használhatod.
+                
+                Adatok:
+                -magasság: %s
+                -szélesség: %s
+                
+                Az ügyfél megjegyzése:
+                %s
+              
+                
+                FONTOS:
+                A tetoválás körbefutó kategóriába akkor sorolandó, ha a képen látható minta:
+                - teljesen körbefutja a kart, lábszárat vagy combot,
+                - pánt jellegű,
+                - 360°‑ban záródó mintát alkot
+                
+                Ha a tetoválás körbefutó jellegű, akkor a méretkód: Pánt.
+                Ebben az esetben a felület szerinti méretkódot figyelmen kívül kell hagyni.
+                
+                Árlista:
+                
+                XS (Apró, ≤25 cm²)
+                - Normál: 8 000 Ft
+                - Normál (csak szöveg): 8 000 Ft
+                - Normál + tervezés: 10 000 Ft
+                - Állat: 10 000 Ft
+                - Részletes: 10 000 Ft
+                - Részletes + tervezés: 15 000 Ft
+                
+                S (Kicsi, 26–75 cm²)
+                - Normál: 13 000 Ft
+                - Normál (csak szöveg): 10 000 Ft
+                - Normál + tervezés: 18 000 Ft
+                - Állat: 18 000 Ft
+                - Részletes: 18 000 Ft
+                - Részletes + tervezés: 23 000 Ft
+                
+                M (Közepes, 76–150 cm²)
+                - Normál: 20 000 Ft
+                - Normál (csak szöveg): 18 000 Ft
+                - Normál + tervezés: 30 000 Ft
+                - Állat: 30 000 Ft
+                - Részletes: 30 000 Ft
+                - Részletes + tervezés: 35 000 Ft
+                
+                L (Közepes/Nagy, 151–250 cm²)
+                - Normál: 40 000 Ft
+                - Normál (csak szöveg): 20 000 Ft
+                - Normál + tervezés: 45 000 Ft
+                - Állat: 45 000 Ft
+                - Részletes: 45 000 Ft
+                - Részletes + tervezés: 50 000 Ft
+                
+                XL (Nagy, 251–400 cm²)
+                - Normál: 45 000 Ft
+                - Normál (csak szöveg): 25 000 Ft
+                - Normál + tervezés: 50 000 Ft
+                - Állat: 50 000 Ft
+                - Részletes: 50 000 Ft
+                - Részletes + tervezés: 55 000 Ft
+                
+                XXL (Nagy+, 401–600 cm²)
+                - Normál: 50 000 Ft
+                - Normál (csak szöveg): 30 000 Ft
+                - Normál + tervezés: 55 000 Ft
+                - Állat: 55 000 Ft
+                - Részletes: 55 000 Ft
+                - Részletes + tervezés: 60 000 Ft
+                
+                Pánt (Körbefutó – Alkar / Lábszár / Comb)
+                - Normál: 45 000 Ft
+                - Normál (csak szöveg): -
+                - Normál + tervezés: 50 000 Ft
+                - Állat: -
+                - Részletes: 60 000 Ft
+                - Részletes + tervezés: 70 000 Ft
+                
+                Egyedi (>600 cm²)
+                - Minden kategória: Egyedi árazás
+                Í
+                Feladat:
+                
+                1. Elemezd a képet/képeket.
+                
+                2. Állapítsd meg:
+                   - complexity: egyszerű / közepes / részletes
+                   - designNeeded = true csak akkor, ha a tetoválás elkészítéséhez
+                	a tetoválónak új grafikát kell létrehoznia.
+                	false:
+                	- Pinterest referencia alapján készült egyszerű minta
+                	- egyszerű szimbólum
+                	- geometria
+                	- alap állat kontúr
+                	- egyszerű szöveg
+                	- kész sablon jellegű minta
+                
+                     	true:
+                     	- kliens egyedi ötlete alapján készülő rajz
+                     	- személyre szabott karakter
+                     	- egyedi kompozíció
+                     	- több elem összeállítása
+                    	- művészi újratervezést igényel
+                   - isAnimal: true/false
+                   - isText: true/false
+                   - isWrapAround: true/false  ← Ezt TE állapítod meg a kép alapján.
+                
+                3. Ha isWrapAround = true → méretkód = Pánt.
+                   Ha isWrapAround = false → méretkód = felület alapján.
+                
+                4. A kategóriák közül válaszd ki:
+                   - normal
+                   - normal_text
+                   - normal_custom
+                   - animal
+                   - detailed
+                   - detailed_custom
+                
+                5. A táblázat alapján számold ki a végső árat.
+                
+                6. Add vissza a következő JSON-t:
+                
+                {
+                  "estimatedWidth": number,
+                  "estimatedHeight": number,
+                  "isWrapAround": true/false,
+                  "complexity": "...",
+                  "designNeeded": true/false,
+                  "isAnimal": true/false,
+                  "isText": true/false,
+                  "category": "...",
+                  "price": number,
+                  "reason": "rövid szöveges magyarázat"
+                }
+                
+                FONTOS:
+                A választ kizárólag érvényes JSON formátumban add vissza.
+                
+                Tilos:
+                - markdown
+                - magyarázó szöveg JSON-on kívül
+                - komment
+                - ``` karakterek
+                
+                A válasz mindig ugyanazt a struktúrát használja.
+                
+                """.formatted(customText,tattooHeight, tattooWidth );
+    }
+
+    public PriceQuoteForCustomTattooRes getPriceQuoteForCustomTattoo(GetPriceQuoteForCustomTattooReq req) throws JsonProcessingException {
+        String prompt = buildCustomPrompt(req.getCustomTattooText(), req.getWidth(), req.getHeight());
+        List<MultipartFile> ref = req.getTattooRefference();
+        List<String> base64Refs = new ArrayList<>(ref.size());
+        for (MultipartFile file : ref) {
+            base64Refs.add(toBase64(file));
+        }
+        List<ChatMessageContentItem> contentItems = new ArrayList<>(base64Refs.size());
+        for (String base64Ref : base64Refs) {
+            contentItems.add(
+                    new ChatMessageImageContentItem(
+                            new ChatMessageImageUrl(base64Ref)
+                    ));
+        }
+        contentItems.add(new ChatMessageTextContentItem(prompt));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ChatRequestUserMessage message = new ChatRequestUserMessage(
+               contentItems
+        );
+        ChatCompletionsOptions options = new ChatCompletionsOptions(
+                Arrays.asList(
+                        new ChatRequestSystemMessage("You are a tattoo pricing assistant."),
+                        message
+                )
+        );
+        ChatCompletions completions = client.getChatCompletions("gpt-5.4-mini", options);
+
+        String content = completions.getChoices().getFirst().getMessage().getContent();
+
+        return objectMapper.readValue(content, PriceQuoteForCustomTattooRes.class);
+    }
 }

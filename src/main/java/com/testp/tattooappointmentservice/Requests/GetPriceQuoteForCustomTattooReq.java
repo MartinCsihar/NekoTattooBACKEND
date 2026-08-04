@@ -12,5 +12,7 @@ import java.util.List;
 public class GetPriceQuoteForCustomTattooReq {
     private List<MultipartFile> tattooRefference;
     private String customTattooText;
+    private double width;
+    private double height;
     private TattooStyle tattooStyle;
 }

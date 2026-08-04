@@ -57,6 +57,7 @@ public class MailService {
         sender.send(mimeMessage);
     }
 
+    // MEGJEGYZÉS KELL AZ EGYEDI TERVEZÉSŰ TETOVÁLÁSHOZ!!!!!!!
     private String generateMail(SendMailReq req, boolean forUser) {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.of("hu", "HU"));
         nf.setMaximumFractionDigits(0);

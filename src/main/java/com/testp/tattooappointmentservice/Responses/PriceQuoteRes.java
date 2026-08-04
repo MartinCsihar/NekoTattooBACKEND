@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PriceQuoteRes {
-   public String complexity;
-   public Boolean isAnimal;
-   public Boolean isWrapAround;
-   public Boolean isText;
-   public TattooCategory category;
-   public Integer price;
-   public String reason;
-   public Boolean designNeeded;
+   private String complexity;
+   private Boolean isAnimal;
+   private Boolean isWrapAround;
+   private Boolean isText;
+   private TattooCategory category;
+   private Integer price;
+   private String reason;
+   private Boolean designNeeded;
 }

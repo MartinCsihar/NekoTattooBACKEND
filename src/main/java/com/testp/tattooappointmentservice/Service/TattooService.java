@@ -50,8 +50,8 @@ public class TattooService {
                 .lastName(req.getLastName())
                 .firstName(req.getFirstName())
                 .price(req.getTattooPrice())
-                .width(req.getTattooWidth())
-                .height(req.getTattooHeight())
+                .width(req.getWidth())
+                .height(req.getHeight())
                 .tattooRefference(req.getTattooRefferences())
                 .appDate(req.getAppointmentDate())
                 .appTime(req.getAppointmentTime())
@@ -78,12 +78,6 @@ public class TattooService {
         MultipartFile tattooRefference = req.getTattooRefference();
         String base64Image =  toBase64(tattooRefference);
 
-        String endpoint = System.getenv("AZURE_OPENAI_ENDPOINT")
-                .replaceAll("/$", "");
-        String apiKey = System.getenv("AZURE_OPENAI_KEY");
-        String deployment = System.getenv("AZURE_OPENAI_DEPLOYMENT");
-        String apiVersion = System.getenv("AZURE_OPENAI_API_VERSION");
-
         ObjectMapper mapper = new ObjectMapper();
 
         ChatRequestUserMessage userMessage = new ChatRequestUserMessage(
@@ -98,7 +92,6 @@ public class TattooService {
                         userMessage
                 )
         );
-
         ChatCompletions completions =
                 client.getChatCompletions("gpt-5.4-mini", options);
 

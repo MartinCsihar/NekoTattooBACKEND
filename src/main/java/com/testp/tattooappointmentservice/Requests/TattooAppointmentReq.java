@@ -24,8 +24,10 @@ public class TattooAppointmentReq {
     private String firstName;
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
+    private List<Double> width;
+    private List<Double> height;
     private TattooStyle style;
-    private Integer tattooPrice;
+    private List<Integer> tattooPrice;
     private List<MultipartFile> tattooRefferences;
-    private Boolean uniqueTattoo; //When consulation needed
+    private List<Boolean> uniqueTattoo; //When consulation needed
 }

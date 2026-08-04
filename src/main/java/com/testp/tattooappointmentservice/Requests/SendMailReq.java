@@ -21,10 +21,10 @@ public class SendMailReq {
     private List<MultipartFile> tattooRefference;
     private LocalDate appDate;
     private LocalTime appTime;
-    private Integer price;
-    private Double height;
-    private Double width;
+    private List<Integer> price;
+    private List<Double> height;
+    private List<Double> width;
     private String phoneNumber;
     private String email;
-    private Boolean uniqueTattoo;
+    private List<Boolean> uniqueTattoo;
 }

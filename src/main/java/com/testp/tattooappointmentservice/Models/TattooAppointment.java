@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Random;
 
 @Entity
@@ -25,12 +26,12 @@ public class TattooAppointment {
     private String firstName;
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
-    private Double tattooHeight;
-    private Double tattooWidth;
+//    private Double tattooHeight;
+//    private Double tattooWidth;
 
     @Enumerated(EnumType.STRING)
     private TattooStyle style;
-    private Integer tattooPrice;
+    private List<Integer> tattooPrice;
 
     @PrePersist
     public void prePersist() {

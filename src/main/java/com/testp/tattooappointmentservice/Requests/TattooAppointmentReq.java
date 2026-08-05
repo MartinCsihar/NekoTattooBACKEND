@@ -1,8 +1,6 @@
 package com.testp.tattooappointmentservice.Requests;
 
 import com.testp.tattooappointmentservice.Enums.TattooStyle;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,9 +25,10 @@ public class TattooAppointmentReq {
     private List<Double> width;
     private List<Double> height;
     private TattooStyle style;
+    private List<String> bodyParts;
     private List<Integer> tattooPrice;
     private List<MultipartFile> tattooRefferences;
-    private Boolean largeTattoo; //When tattoo is bigger than 600cm2 - Optional
-    private Boolean customDesignTattoo; // Optional
-    private String customDesignTattooText; // Optional
+    private Boolean largeTattoo; //When tattoo is bigger than 600cm2
+    private Boolean customDesignTattoo;
+    private String customDesignTattooText;
 }

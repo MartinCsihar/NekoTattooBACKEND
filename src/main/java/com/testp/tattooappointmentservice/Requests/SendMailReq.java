@@ -23,6 +23,7 @@ public class SendMailReq {
     private LocalTime appTime;
     private List<Integer> price;
     private List<Double> height;
+    private List<String> bodyParts;
     private List<Double> width;
     private String phoneNumber;
     private String email;

@@ -79,6 +79,7 @@ public class MailService {
 
             String finalPriceText = getFinalPriceText(req, nf, formattedPriceSUM);
 
+            StringBuilder bParts = getBodyPartsText(req);
 
             List<Double> heights = req.getHeight();
             List<Double> widths = req.getWidth();
@@ -127,10 +128,15 @@ public class MailService {
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold;">Időpont:</td>
                                               <td style="padding: 12px; border: 1px solid #680E14;">%s, %s</td>
                                             </tr>
-                                              <tr style="background-color: rgba(104,14,20, 0.05);">
+                                            <tr style="background-color: rgba(104,14,20, 0.05);">
+                                              <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold;">Testrészek:</td>
+                                              <td style="padding: 12px; border: 1px solid #680E14;">%s</td>
+                                            </tr>
+                                            <tr style="background-color: #EFE9DF;">
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Magasság x szélesség:</td>
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">%s</td>
-                                            <tr style="background-color: #EFE9DF;">
+                                            </tr>
+                                            <tr style="background-color: rgba(104,14,20, 0.05);">
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Fizetendő:</td>
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">%s</td>
                                             </tr>
@@ -171,6 +177,7 @@ public class MailService {
                     text,
                     "#"+req.getAppId(),
                     req.getAppDate(), req.getAppTime(),
+                    bParts,
                     sizes,
                     finalPriceText,
                     req.getLastName(), req.getFirstName(),
@@ -182,6 +189,7 @@ public class MailService {
             );
         }
         else{
+            StringBuilder bParts = getBodyPartsText(req) ;
         String customDesignMessage = customDesignTattoo != null && customDesignTattoo ? """
                 <div style="background-color: whitesmoke; width: 90%%; justify-self:center;margin:auto; height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; ">
                     <p style="margin:10px; display:block; "><i>%s</i></p>
@@ -225,6 +233,10 @@ public class MailService {
                         <td style="padding: 12px; border: 1px solid #680E14;">%s, %s</td>
                         </tr>
                         <tr style="background-color: rgba(104,14,20, 0.05);">
+                        <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold;">Testrész:</td>
+                        <td style="padding: 12px; border: 1px solid #680E14;">%s</td>
+                        </tr>
+                        <tr style="background-color: #EFE9DF;">
                         <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Fizetendő:</td>
                         <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">%s</td>
                         </tr>
@@ -266,6 +278,7 @@ public class MailService {
                         text,
                         "#"+req.getAppId(),
                         req.getAppDate(), req.getAppTime(),
+                        bParts,
                         finalPriceText,
                         req.getLastName(), req.getFirstName(),
                         req.getPhoneNumber(),
@@ -275,6 +288,19 @@ public class MailService {
                 );
             }
         }
+
+    private static @NonNull StringBuilder getBodyPartsText(SendMailReq req) {
+        List<String> bodyParts = req.getBodyParts();
+        StringBuilder bParts =  new StringBuilder();
+        for (int i = 0; i < bodyParts.size(); i++) {
+            if(i != bodyParts.size() - 1){
+                bParts.append(bodyParts.get(i)).append(", ");
+            }else{
+                bParts.append(bodyParts.get(i));
+            }
+        }
+        return bParts;
+    }
 
     private String getFinalPriceText(SendMailReq req, NumberFormat nf, String formattedPriceSUM) {
         List<Integer> prices = req.getPrice();

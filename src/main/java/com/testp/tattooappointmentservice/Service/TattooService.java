@@ -44,6 +44,7 @@ public class TattooService {
         repo.save(appointment);
         SendMailReq smr = SendMailReq.builder()
                 .appId(appointment.getAppId())
+                .bodyParts(req.getBodyParts())
                 .lastName(req.getLastName())
                 .firstName(req.getFirstName())
                 .price(req.getTattooPrice())

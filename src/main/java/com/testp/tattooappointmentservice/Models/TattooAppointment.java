@@ -27,6 +27,9 @@ public class TattooAppointment {
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
 
+
+    private List<String>  bodyParts;
+
     @Enumerated(EnumType.STRING)
     private TattooStyle style;
     private List<Integer> tattooPrice;

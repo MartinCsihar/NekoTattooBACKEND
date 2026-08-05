@@ -26,7 +26,7 @@ public class SendMailReq {
     private List<Double> width;
     private String phoneNumber;
     private String email;
-    private List<Boolean> uniqueTattoo;
+    private Boolean largeTattoo;
     private Boolean customDesignTattoo;
     private String customDesignTattooText;
 }

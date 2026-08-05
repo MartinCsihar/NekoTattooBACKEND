@@ -41,6 +41,7 @@ public class MailService {
 
         sender.send(mimeMessage);
     }
+
     public void sendClientMail(SendMailReq req) throws MessagingException, IOException {
         MimeMessage mimeMessage = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -57,33 +58,26 @@ public class MailService {
         sender.send(mimeMessage);
     }
 
-    // MEGJEGYZÉS KELL AZ EGYEDI TERVEZÉSŰ TETOVÁLÁSHOZ!!!!!!!
-    private String generateMail(SendMailReq req, boolean forUser, boolean customDesignTattoo) {
+    private String generateMail(SendMailReq req, boolean forUser, Boolean customDesignTattoo) {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.of("hu", "HU"));
         nf.setMaximumFractionDigits(0);
         Integer priceSum = getPriceSum(req);
         String formattedPriceSUM = nf.format(priceSum);
-        String text = "";
-        List<Integer> uniqueIndices = new ArrayList<>();
-
+        String text;
 
         if(!forUser){
-            if(req.getCustomDesignTattoo() == true){
+            if(customDesignTattoo != null && customDesignTattoo){
                 text = "Az ügyfél egyik tetoválása egyedi tervezést igényel, melynek elgondolását lentebb találod!";
             }else{
-                for(int i = 0; i < req.getUniqueTattoo().size(); i++){
-                    if(req.getUniqueTattoo().get(i) == true){
-                        text = "Az ügyfél egyik tetoválása  <strong>600 cm²-nél nagyobb</strong>, így <strong>konzultációra lesz szükséged</strong>, vedd fel vele a kapcsolatot, ha még nem tette volna meg a vendég!";
-                        uniqueIndices.add(i);
-                    }
-
-                    else{
-                        text = "";
-                    }
+                if(req.getLargeTattoo()!=null && req.getLargeTattoo()){
+                    text = "Az ügyfél egyik tetoválása  <strong>600 cm²-nél nagyobb</strong>, így <strong>konzultációra lesz szükséged</strong>, vedd fel vele a kapcsolatot, ha még nem tette volna meg a vendég!";
+                }
+                else{
+                    text = "";
                 }
             }
 
-            String finalPriceText = getFinalPriceText(req, nf, formattedPriceSUM, uniqueIndices);
+            String finalPriceText = getFinalPriceText(req, nf, formattedPriceSUM);
 
 
             List<Double> heights = req.getHeight();
@@ -93,14 +87,14 @@ public class MailService {
                 Double currHeight = heights.get(i);
                 Double currWidth = widths.get(i);
                 // 12.5x14 cm
-                String size = "%.1f cm x %.1f cm ".formatted(currWidth, currHeight);
+                String size = "%.1f cm x %.1f cm ".formatted(currHeight, currWidth);
                 if (i != heights.size() - 1) {
                     sizes.append(size).append(" | ");
                 } else {
                     sizes.append(size);
                 }
             }
-            String customDesignMessage  = customDesignTattoo ? """
+            String customDesignMessage  = customDesignTattoo != null && customDesignTattoo ? """
                     <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
                         <p style="margin:10px; display:block; "><i>%s</i></p>
                     </div>
@@ -134,7 +128,7 @@ public class MailService {
                                               <td style="padding: 12px; border: 1px solid #680E14;">%s, %s</td>
                                             </tr>
                                               <tr style="background-color: rgba(104,14,20, 0.05);">
-                                              <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Tetoválás méret/méretek:</td>
+                                              <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Magasság x szélesség:</td>
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">%s</td>
                                             <tr style="background-color: #EFE9DF;">
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Fizetendő:</td>
@@ -188,21 +182,20 @@ public class MailService {
             );
         }
         else{
-            String customDesignMessage  = customDesignTattoo ? """
-                    <div style="background-color: whitesmoke; width: 90%%; justify-self:center;margin:auto; height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; ">
-                        <p style="margin:10px; display:block; "><i>%s</i></p>
-                    </div>
-                    """.formatted(req.getCustomDesignTattooText()) : "";
-            for(int i = 0; i < req.getUniqueTattoo().size(); i++){
-                if(req.getUniqueTattoo().get(i) == true){
-                    text = "Az egyik tetoválásod mérete alapján <strong>konzultációra van szükséged</strong>, vedd fel velem a kapcsolatot mihamarabb!";
-                    uniqueIndices.add(i);
-                }
-                else{
-                    text = "Ha bármi kérdésed van, nyugodtan vedd fel velem a kapcsolatot!";
-                }
-            }
-            String finalPriceText = getFinalPriceText(req, nf, formattedPriceSUM, uniqueIndices);
+        String customDesignMessage = customDesignTattoo != null && customDesignTattoo ? """
+                <div style="background-color: whitesmoke; width: 90%%; justify-self:center;margin:auto; height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; ">
+                    <p style="margin:10px; display:block; "><i>%s</i></p>
+                </div>
+                """.formatted(req.getCustomDesignTattooText()) : "";
+
+        if (req.getLargeTattoo()!= null && req.getLargeTattoo()) {
+            text = "Az egyik tetoválásod mérete alapján <strong>konzultációra van szükséged</strong>, vedd fel velem a kapcsolatot mihamarabb!";
+
+        } else {
+            text = "Ha bármi kérdésed van, nyugodtan vedd fel velem a kapcsolatot!";
+        }
+
+            String finalPriceText = getFinalPriceText(req, nf, formattedPriceSUM);
 
             return """
                         <!DOCTYPE html>
@@ -283,7 +276,7 @@ public class MailService {
             }
         }
 
-    private String getFinalPriceText(SendMailReq req, NumberFormat nf, String formattedPriceSUM, List<Integer> uniqueIndices) {
+    private String getFinalPriceText(SendMailReq req, NumberFormat nf, String formattedPriceSUM) {
         List<Integer> prices = req.getPrice();
         List<String> formattedPrices = new ArrayList<>();
         for (var  price : prices){
@@ -296,11 +289,11 @@ public class MailService {
         }
 
         StringBuilder finalPriceText = new StringBuilder();
-        boolean hasUnique = !uniqueIndices.isEmpty();
+        boolean largeTattoo = req.getLargeTattoo()!=null && req.getLargeTattoo();
 
-        if(!req.getTattooRefference().isEmpty() && !hasUnique){
+        if(!req.getTattooRefference().isEmpty() && !largeTattoo){
             finalPriceText.append(formattedPriceSUM);
-        }else if(hasUnique){
+        }else if(largeTattoo){
             for(int i = 0; i < formattedPrices.size(); i++){
                 if(i != formattedPrices.size()-1){
                     finalPriceText.append(formattedPrices.get(i)).append(" + ");
@@ -324,10 +317,10 @@ public class MailService {
     }
 
     private void addAttachments(SendMailReq req, MimeMessageHelper helper) throws MessagingException, IOException {
-        if (!req.getTattooRefference().isEmpty()){
-            for(int i = 0;i<req.getTattooRefference().size();i++){
+        if (!req.getTattooRefference().isEmpty()) {
+            for (int i = 0; i < req.getTattooRefference().size(); i++) {
                 helper.addAttachment(
-                        "TetoválásReferencia_"+ i + "."+Objects.requireNonNull(req.getTattooRefference().get(i).getContentType()).substring(6).strip(),
+                        "TetoválásReferencia_" + i + "." + Objects.requireNonNull(req.getTattooRefference().get(i).getContentType()).substring(6).strip(),
                         new ByteArrayDataSource(
                                 req.getTattooRefference().get(i).getBytes(),
                                 req.getTattooRefference().get(i).getContentType()

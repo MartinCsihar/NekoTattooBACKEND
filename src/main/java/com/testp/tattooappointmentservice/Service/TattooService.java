@@ -54,7 +54,7 @@ public class TattooService {
                 .appTime(req.getAppointmentTime())
                 .phoneNumber(req.getPhoneNumber())
                 .email(req.getEmail())
-                .uniqueTattoo(req.getUniqueTattoo())
+                .largeTattoo(req.getLargeTattoo())
                 .customDesignTattoo(req.getCustomDesignTattoo())
                 .customDesignTattooText(req.getCustomDesignTattooText())
                 .build();

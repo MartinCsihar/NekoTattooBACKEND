@@ -29,7 +29,7 @@ public class TattooAppointmentReq {
     private TattooStyle style;
     private List<Integer> tattooPrice;
     private List<MultipartFile> tattooRefferences;
-    private List<Boolean> uniqueTattoo; //When consulation needed
-    private Boolean customDesignTattoo;
-    private String customDesignTattooText;
+    private Boolean largeTattoo; //When tattoo is bigger than 600cm2 - Optional
+    private Boolean customDesignTattoo; // Optional
+    private String customDesignTattooText; // Optional
 }

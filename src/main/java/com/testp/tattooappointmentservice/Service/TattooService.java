@@ -55,6 +55,8 @@ public class TattooService {
                 .phoneNumber(req.getPhoneNumber())
                 .email(req.getEmail())
                 .uniqueTattoo(req.getUniqueTattoo())
+                .customDesignTattoo(req.getCustomDesignTattoo())
+                .customDesignTattooText(req.getCustomDesignTattooText())
                 .build();
 
         mailService.sendMeMail(smr);

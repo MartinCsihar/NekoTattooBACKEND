@@ -30,4 +30,6 @@ public class TattooAppointmentReq {
     private List<Integer> tattooPrice;
     private List<MultipartFile> tattooRefferences;
     private List<Boolean> uniqueTattoo; //When consulation needed
+    private Boolean customDesignTattoo;
+    private String customDesignTattooText;
 }

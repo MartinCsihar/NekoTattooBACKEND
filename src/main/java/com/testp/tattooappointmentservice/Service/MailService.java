@@ -31,7 +31,7 @@ public class MailService {
         MimeMessage mimeMessage = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-        String htmlContent = generateMail(req, false);
+        String htmlContent = generateMail(req, false, req.getCustomDesignTattoo());
 
         helper.setSubject("Új foglalás! - NekoTattoo");
         helper.setTo(mailSenderEmail);
@@ -47,7 +47,7 @@ public class MailService {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.of("hu", "HU"));
         nf.setMaximumFractionDigits(0);
 
-        String htmlContent = generateMail(req, true);
+        String htmlContent = generateMail(req, true, req.getCustomDesignTattoo());
 
         addAttachments(req, helper);
 
@@ -58,22 +58,28 @@ public class MailService {
     }
 
     // MEGJEGYZÉS KELL AZ EGYEDI TERVEZÉSŰ TETOVÁLÁSHOZ!!!!!!!
-    private String generateMail(SendMailReq req, boolean forUser) {
+    private String generateMail(SendMailReq req, boolean forUser, boolean customDesignTattoo) {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.of("hu", "HU"));
         nf.setMaximumFractionDigits(0);
-        if(!forUser){
-            Integer priceSum = getPriceSum(req);
+        Integer priceSum = getPriceSum(req);
+        String formattedPriceSUM = nf.format(priceSum);
+        String text = "";
+        List<Integer> uniqueIndices = new ArrayList<>();
 
-            String formattedPriceSUM = nf.format(priceSum);
-            String text = "";
-            List<Integer> uniqueIndices = new ArrayList<>();
-            for(int i = 0; i < req.getUniqueTattoo().size(); i++){
-                if(req.getUniqueTattoo().get(i) == true){
-                    text = "Az ügyfél egyik tetoválása  <strong>600 cm²-nél nagyobb</strong>, így <strong>konzultációra lesz szükséged</strong>, vedd fel vele a kapcsolatot, ha még nem tette volna meg a vendég!";
-                    uniqueIndices.add(i);
-                }
-                else{
-                    text = "";
+
+        if(!forUser){
+            if(req.getCustomDesignTattoo() == true){
+                text = "Az ügyfél egyik tetoválása egyedi tervezést igényel, melynek elgondolását lentebb találod!";
+            }else{
+                for(int i = 0; i < req.getUniqueTattoo().size(); i++){
+                    if(req.getUniqueTattoo().get(i) == true){
+                        text = "Az ügyfél egyik tetoválása  <strong>600 cm²-nél nagyobb</strong>, így <strong>konzultációra lesz szükséged</strong>, vedd fel vele a kapcsolatot, ha még nem tette volna meg a vendég!";
+                        uniqueIndices.add(i);
+                    }
+
+                    else{
+                        text = "";
+                    }
                 }
             }
 
@@ -87,14 +93,18 @@ public class MailService {
                 Double currHeight = heights.get(i);
                 Double currWidth = widths.get(i);
                 // 12.5x14 cm
-                String size = "%.1f cm x %.1f cm ".formatted(currWidth,  currHeight);
-                if(i != heights.size()-1){
+                String size = "%.1f cm x %.1f cm ".formatted(currWidth, currHeight);
+                if (i != heights.size() - 1) {
                     sizes.append(size).append(" | ");
-                }
-                else{
+                } else {
                     sizes.append(size);
                 }
             }
+            String customDesignMessage  = customDesignTattoo ? """
+                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; "><i>%s</i></p>
+                    </div>
+                    """.formatted(req.getCustomDesignTattooText()) : "";
             return
             """
                     <!DOCTYPE html>
@@ -153,8 +163,11 @@ public class MailService {
                                 <div>
                                   </div>
                             </div>
-                            <div style="background-color: #680e14; padding: 20px; text-align: center; font-size: 12px; color: white;">
+                            %s
+                            <div style="background-color: #680e14; padding: 20px; text-align: center; font-size: 12px; color: white;margin-top:20px;">
                               <p>© 2026 Neko Tattoo - Kira</p>
+                               <p style="font-size:smaller">nekotatoo26@gmail.com</p>
+                               <p style="font-size:smaller">+36 30 368 3414</p>
                             </div>
                           </div>
                      </body>
@@ -169,15 +182,17 @@ public class MailService {
                     req.getLastName(), req.getFirstName(),
                     req.getPhoneNumber(),
                     req.getEmail(),
-                    LocalDate.now()
+                    LocalDate.now(),
+                    customDesignMessage
+
             );
         }
         else{
-            Integer priceSum = getPriceSum(req);
-            String formattedPriceSUM = nf.format(priceSum);
-
-            String text = "";
-            List<Integer> uniqueIndices = new ArrayList<>();
+            String customDesignMessage  = customDesignTattoo ? """
+                    <div style="background-color: whitesmoke; width: 90%%; justify-self:center;margin:auto; height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; ">
+                        <p style="margin:10px; display:block; "><i>%s</i></p>
+                    </div>
+                    """.formatted(req.getCustomDesignTattooText()) : "";
             for(int i = 0; i < req.getUniqueTattoo().size(); i++){
                 if(req.getUniqueTattoo().get(i) == true){
                     text = "Az egyik tetoválásod mérete alapján <strong>konzultációra van szükséged</strong>, vedd fel velem a kapcsolatot mihamarabb!";
@@ -244,8 +259,11 @@ public class MailService {
                         <div>
                         </div>
                         </div>
-                        <div style="background-color: #680e14; padding: 20px; text-align: center; font-size: 12px; color: white;">
-                        <p>© 2026 Neko Tattoo - Kira</p>
+                        %s
+                        <div style="background-color: #680e14; padding: 20px; text-align: center; font-size: 12px; color: white;margin-top:20px;">
+                            <p>© 2026 Neko Tattoo - Kira</p>
+                            <p style="font-size:smaller">nekotatoo26@gmail.com</p>
+                            <p style="font-size:smaller">+36 30 368 3414</p>
                         </div>
                         </div>
                         </body>
@@ -259,7 +277,8 @@ public class MailService {
                         req.getLastName(), req.getFirstName(),
                         req.getPhoneNumber(),
                         req.getEmail(),
-                        LocalDate.now()
+                        LocalDate.now(),
+                        customDesignMessage
                 );
             }
         }

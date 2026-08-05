@@ -26,8 +26,6 @@ public class TattooAppointment {
     private String firstName;
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
-//    private Double tattooHeight;
-//    private Double tattooWidth;
 
     @Enumerated(EnumType.STRING)
     private TattooStyle style;

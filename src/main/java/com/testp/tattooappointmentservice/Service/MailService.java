@@ -61,8 +61,12 @@ public class MailService {
     private String generateMail(SendMailReq req, boolean forUser, Boolean customDesignTattoo) {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.of("hu", "HU"));
         nf.setMaximumFractionDigits(0);
-        Integer priceSum = getPriceSum(req);
-        String formattedPriceSUM = nf.format(priceSum);
+        String formattedPriceSUM = null;
+        Integer priceSum = null;
+        if(req.getPrice() != null) {
+            priceSum = getPriceSum(req);
+            formattedPriceSUM = nf.format(priceSum);
+        }
         String text;
 
         if(!forUser){
@@ -87,7 +91,7 @@ public class MailService {
             for (int i = 0; i<heights.size(); i++) {
                 Double currHeight = heights.get(i);
                 Double currWidth = widths.get(i);
-                // 12.5x14 cm
+                // 12.5x14 cmF
                 String size = "%.1f cm x %.1f cm ".formatted(currHeight, currWidth);
                 if (i != heights.size() - 1) {
                     sizes.append(size).append(" | ");
@@ -303,14 +307,18 @@ public class MailService {
     }
 
     private String getFinalPriceText(SendMailReq req, NumberFormat nf, String formattedPriceSUM) {
-        List<Integer> prices = req.getPrice();
         List<String> formattedPrices = new ArrayList<>();
-        for (var  price : prices){
-            if(price != null){
-                String fPrice = nf.format(price);
-                formattedPrices.add(fPrice);
-            }else{
-                formattedPrices.add("Konzultáció szükséges");
+        if(req.getPrice() == null){
+            formattedPrices.add("Konzultáció szükséges!");
+        }else{
+            List<Integer> prices = req.getPrice();
+            for (var  price : prices){
+                if(price != null){
+                    String fPrice = nf.format(price);
+                    formattedPrices.add(fPrice);
+                }else{
+                    formattedPrices.add("Konzultáció szükséges");
+                }
             }
         }
 

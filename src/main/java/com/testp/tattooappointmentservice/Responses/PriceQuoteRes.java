@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 @Builder
 @Data
 @AllArgsConstructor
@@ -20,4 +22,6 @@ public class PriceQuoteRes {
    private Integer price;
    private String reason;
    private Boolean designNeeded;
+   private Double estimatedWidth;
+   private Double estimatedHeight;
 }

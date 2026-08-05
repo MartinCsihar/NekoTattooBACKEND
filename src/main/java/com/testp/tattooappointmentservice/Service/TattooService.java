@@ -65,11 +65,14 @@ public class TattooService {
     }
 
     public PriceQuoteRes getPriceQuote(GetPriceQuoteReq req) throws JsonProcessingException {
-
-
-        Double width = req.getSizeWidth();
-        Double height = req.getSizeHeight();
-        double area = width * height;
+        Double width = null;
+        Double height = null;
+        Double area = null;
+        if(req.getSizeHeight() != null && req.getSizeWidth() != null){
+            width = req.getSizeWidth();
+            height = req.getSizeHeight();
+            area = width * height;
+        }
         //String sizeCode = sizeCodeFromArea(area);
 
         String prompt = buildNormalPrompt(height, width, area);
@@ -118,17 +121,20 @@ public class TattooService {
         }
     }
 
-    private String buildNormalPrompt(double height, double width, double area) {
+    private String buildNormalPrompt(Double height, Double width, Double area) {
+        var finalWidth = width != null ? width.toString() + " cm" : "Nincs megadva, meg kell becsülni";
+        var finalHeight = height != null ? height.toString() + " cm" : "Nincs megadva, meg kell becsülni";
+        var finalArea = height !=null && width != null ? height*width : "Nincs megadva, ki kell számolni!";
         return """
-                Elemezd a tetoválás fényképét és a vendég által megadott méreteket (cm).
+                Elemezd a tetoválás fényképét és a vendég által megadott méreteket (cm), amennyiben megadta, ha nem adta meg (Amikor ez a szöveg van a méretadatok mellett: 'Nincs megadva, meg kell becsülni', akkor a pontosan becsüld meg a kép alapján, és azzal dolgozz.
                 
                               A feladatod: a tetoválás kategorizálása és az ár kiszámítása a következő árlista alapján.
                               A számítás során kizárólag a megadott árlistát használhatod.
                               Ne interpolálj, ne becsülj, ne módosíts árakat.
                               Méretadatok:
-                               - magasság: %s cm
-                               - szélesség: %s cm
-                               - terület: %s cm²
+                               - magasság: %s
+                               - szélesség: %s
+                               - terület: %s
                               FONTOS:
                               A tetoválás körbefutó kategóriába akkor sorolandó, ha a képen látható minta:
                               - teljesen körbefutja a kart, lábszárat vagy combot,
@@ -241,6 +247,8 @@ public class TattooService {
                               6. Add vissza a következő JSON-t:
                 
                               {
+                                "estimatedWidth": amennyiben meg kellett becsülni, akkor a becsült érték kerül ide, különben null;
+                                "estimatedHeight": amennyiben meg kellett becsülni, akkor a becsült érték kerül ide, különben null;
                                 "isWrapAround": true/false,
                                 "complexity": "...",
                                 "designNeeded": true/false,
@@ -261,7 +269,7 @@ public class TattooService {
                               - ``` karakterek
                 
                               A válasz mindig ugyanazt a struktúrát használja.
-                """.formatted(height, width, area);
+                """.formatted(finalHeight, finalWidth, finalArea);
     }
 
     private String buildCustomPrompt(String customText, Double width, Double height) {

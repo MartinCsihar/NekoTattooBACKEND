@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -24,15 +25,13 @@ public class TattooAppointment {
     private String phoneNumber;
     private String lastName;
     private String firstName;
-    private LocalDate appointmentDate;
-    private LocalTime appointmentTime;
-
-
     private List<String>  bodyParts;
 
     @Enumerated(EnumType.STRING)
     private TattooStyle style;
+
     private List<Integer> tattooPrice;
+
 
     @PrePersist
     public void prePersist() {

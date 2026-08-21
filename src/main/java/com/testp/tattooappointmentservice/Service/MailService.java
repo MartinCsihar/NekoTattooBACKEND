@@ -33,7 +33,7 @@ public class MailService {
 
         String htmlContent = generateMail(req, false, req.getCustomDesignTattoo());
 
-        helper.setSubject("Új foglalás! - NekoTattoo");
+        helper.setSubject("Új Konzultácó iránti kérelem! - NekoTattoo");
         helper.setTo(mailSenderEmail);
         helper.setText(htmlContent, true);
 
@@ -52,7 +52,7 @@ public class MailService {
 
         addAttachments(req, helper);
 
-        helper.setSubject("Új foglalás! - NekoTattoo");
+        helper.setSubject("Konzultáció iránti kérelem rögzítve! - NekoTattoo");
         helper.setTo(req.getEmail());
         helper.setText(htmlContent, true);
         sender.send(mimeMessage);
@@ -71,14 +71,10 @@ public class MailService {
 
         if(!forUser){
             if(customDesignTattoo != null && customDesignTattoo){
-                text = "Az ügyfél egyik tetoválása egyedi tervezést igényel, melynek elgondolását lentebb találod!";
+                text = "Minél hamarabb lépj kapcsolatba az ügyféllel telefonon/emailben, hogy megbeszélhessétek az időpontot! Az ügyfél egyik tetoválása egyedi tervezést igényel, melynek elgondolását lentebb találod!";
             }else{
-                if(req.getLargeTattoo()!=null && req.getLargeTattoo()){
-                    text = "Az ügyfél egyik tetoválása  <strong>600 cm²-nél nagyobb</strong>, így <strong>konzultációra lesz szükséged</strong>, vedd fel vele a kapcsolatot, ha még nem tette volna meg a vendég!";
-                }
-                else{
-                    text = "";
-                }
+                    text = "Minél hamarabb lépj kapcsolatba az ügyféllel telefonon/emailben, hogy megbeszélhessétek az időpontot!";
+
             }
 
             String finalPriceText = getFinalPriceText(req, nf, formattedPriceSUM);
@@ -117,20 +113,16 @@ public class MailService {
                         <div style="max-width: 600px; margin: 0 auto; background: #EFE9DF; border-radius: 10px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                           <div style="background-color: #680E14; color: #ffffff; padding: 30px; text-align: center;">
                             <h1 style="margin: 0; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; font-family:'Cinzel Decorative'">Neko Tattoo</h1>
-                            <p style="margin: 10px 0 0 0; opacity: 0.8;">Új foglalás</p>
+                            <p style="margin: 10px 0 0 0; opacity: 0.8;">Új Konzultáció iránti kérelem!</p>
                           </div>
                           <div style="padding: 30px">
                             <p>Kedves <strong>Kira</strong>!</p>
-                            <p><strong>%s %s</strong> imént adott le egy új foglalást! %s</p>
+                            <p><strong>%s %s</strong> imént adott le egy új konzutációs kérelmet! %s</p>
                             <h3 style="border-bottom: 2px solid #f1c40f; padding-bottom: 10px; color: #2c3e50;">Foglalási adatok</h3>
                                     <table style="width:100%%; border-collapse: collapse; margin-top: 20px; justify-self: center;">
                                             <tr style="background-color:rgba(104,14,20, 0.05);">
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; width: 40%%;">Foglalás azonosító</td>
                                               <td style="padding: 12px; border: 1px solid #680E14;">%s</td>
-                                            </tr>
-                                            <tr style="background-color: #EFE9DF;">
-                                              <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold;">Időpont:</td>
-                                              <td style="padding: 12px; border: 1px solid #680E14;">%s, %s</td>
                                             </tr>
                                             <tr style="background-color: rgba(104,14,20, 0.05);">
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold;">Testrészek:</td>
@@ -141,7 +133,7 @@ public class MailService {
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">%s</td>
                                             </tr>
                                             <tr style="background-color: rgba(104,14,20, 0.05);">
-                                              <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Fizetendő:</td>
+                                              <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Fizetendő (Becsült):</td>
                                               <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">%s</td>
                                             </tr>
                                      </table>
@@ -180,7 +172,6 @@ public class MailService {
                     req.getLastName(), req.getFirstName(),
                     text,
                     "#"+req.getAppId(),
-                    req.getAppDate(), req.getAppTime(),
                     bParts,
                     sizes,
                     finalPriceText,
@@ -200,13 +191,6 @@ public class MailService {
                 </div>
                 """.formatted(req.getCustomDesignTattooText()) : "";
 
-        if (req.getLargeTattoo()!= null && req.getLargeTattoo()) {
-            text = "Az egyik tetoválásod mérete alapján <strong>konzultációra van szükséged</strong>, vedd fel velem a kapcsolatot mihamarabb!";
-
-        } else {
-            text = "Ha bármi kérdésed van, nyugodtan vedd fel velem a kapcsolatot!";
-        }
-
             String finalPriceText = getFinalPriceText(req, nf, formattedPriceSUM);
 
             return """
@@ -221,27 +205,23 @@ public class MailService {
                         <div style="max-width: 600px; margin: 0 auto; background: #EFE9DF; border-radius: 10px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                         <div style="background-color: #680E14; color: #ffffff; padding: 30px; text-align: center;">
                         <h1 style="margin: 0; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; font-family:'Cinzel Decorative'">Neko Tattoo</h1>
-                        <p style="margin: 10px 0 0 0; opacity: 0.8;">Foglalásod rögzítve</p>
+                        <p style="margin: 10px 0 0 0; opacity: 0.8;">Konzultáció iránti kérelmed rögzítve!</p>
                         </div>
                         <div style="padding: 30px">
                         <p>Kedves <strong>%s</strong>!</p>
-                        <p><strong>Rögzítettem</strong> a foglalásod! %s </p>
+                        <p><strong>Rögzítettem</strong> a konzultáció iránti kérelmed! A lehető leghamarabb felveszem veled telefonon a kapcsolatot, hogy megbeszéljük a tetoválás időpontját, valamint az esetleges változásokat! </p>
                         <h3 style="border-bottom: 2px solid #f1c40f; padding-bottom: 10px; color: #2c3e50;">Foglalási adatok</h3>
                         <table style="width:100%%; border-collapse: collapse; margin-top: 20px; justify-self: center;">
                         <tr style="background-color:rgba(104,14,20, 0.05);">
                         <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; width: 40%%;">Foglalás azonosító</td>
                         <td style="padding: 12px; border: 1px solid #680E14;">%s</td>
                         </tr>
-                        <tr style="background-color: #EFE9DF;">
-                        <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold;">Időpont:</td>
-                        <td style="padding: 12px; border: 1px solid #680E14;">%s, %s</td>
-                        </tr>
                         <tr style="background-color: rgba(104,14,20, 0.05);">
                         <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold;">Testrész:</td>
                         <td style="padding: 12px; border: 1px solid #680E14;">%s</td>
                         </tr>
                         <tr style="background-color: #EFE9DF;">
-                        <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Fizetendő:</td>
+                        <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">Fizetendő (Becsült):</td>
                         <td style="padding: 12px; border: 1px solid #680E14; font-weight: bold; color: #680E14;">%s</td>
                         </tr>
                         </table>
@@ -279,9 +259,7 @@ public class MailService {
                         </html>
 
                         """.formatted(req.getFirstName(),
-                        text,
                         "#"+req.getAppId(),
-                        req.getAppDate(), req.getAppTime(),
                         bParts,
                         finalPriceText,
                         req.getLastName(), req.getFirstName(),

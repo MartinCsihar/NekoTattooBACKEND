@@ -20,8 +20,6 @@ public class TattooAppointmentReq {
     private String phoneNumber;
     private String lastName;
     private String firstName;
-    private LocalDate appointmentDate;
-    private LocalTime appointmentTime;
     private List<Double> width;
     private List<Double> height;
     private TattooStyle style;

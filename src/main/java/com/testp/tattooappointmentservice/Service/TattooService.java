@@ -36,9 +36,8 @@ public class TattooService {
                 .phoneNumber(req.getPhoneNumber())
                 .lastName(req.getLastName())
                 .firstName(req.getFirstName())
-                .appointmentDate(req.getAppointmentDate())
-                .appointmentTime(req.getAppointmentTime())
                 .style(req.getStyle())
+                .bodyParts(req.getBodyParts())
                 .tattooPrice(req.getTattooPrice())
                 .build();
         repo.save(appointment);
@@ -51,8 +50,6 @@ public class TattooService {
                 .width(req.getWidth())
                 .height(req.getHeight())
                 .tattooRefference(req.getTattooRefferences())
-                .appDate(req.getAppointmentDate())
-                .appTime(req.getAppointmentTime())
                 .phoneNumber(req.getPhoneNumber())
                 .email(req.getEmail())
                 .largeTattoo(req.getLargeTattoo())

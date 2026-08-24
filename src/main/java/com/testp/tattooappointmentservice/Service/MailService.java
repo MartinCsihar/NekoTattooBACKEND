@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -58,7 +59,7 @@ public class MailService {
         sender.send(mimeMessage);
     }
 
-    private String generateMail(SendMailReq req, boolean forUser, Boolean customDesignTattoo) {
+    private String generateMail(SendMailReq req, boolean forUser, List<Boolean> customDesignTattoo) {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.of("hu", "HU"));
         nf.setMaximumFractionDigits(0);
         String formattedPriceSUM = null;
@@ -70,11 +71,10 @@ public class MailService {
         String text;
 
         if(!forUser){
-            if(customDesignTattoo != null && customDesignTattoo){
+            if(customDesignTattoo.contains(true)){
                 text = "Minél hamarabb lépj kapcsolatba az ügyféllel telefonon/emailben, hogy megbeszélhessétek az időpontot! Az ügyfél egyik tetoválása egyedi tervezést igényel, melynek elgondolását lentebb találod!";
             }else{
-                    text = "Minél hamarabb lépj kapcsolatba az ügyféllel telefonon/emailben, hogy megbeszélhessétek az időpontot!";
-
+                text = "Minél hamarabb lépj kapcsolatba az ügyféllel telefonon/emailben, hogy megbeszélhessétek az időpontot!";
             }
 
             String finalPriceText = getFinalPriceText(req, nf, formattedPriceSUM);
@@ -95,11 +95,8 @@ public class MailService {
                     sizes.append(size);
                 }
             }
-            String customDesignMessage  = customDesignTattoo != null && customDesignTattoo ? """
-                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
-                        <p style="margin:10px; display:block; "><i>%s</i></p>
-                    </div>
-                    """.formatted(req.getCustomDesignTattooText()) : "";
+            var customDesignMessageAll = getCustomDesignMessageAll(req, customDesignTattoo);
+
             return
             """
                     <!DOCTYPE html>
@@ -179,17 +176,13 @@ public class MailService {
                     req.getPhoneNumber(),
                     req.getEmail(),
                     LocalDate.now(),
-                    customDesignMessage
+                    customDesignMessageAll
 
             );
         }
         else{
             StringBuilder bParts = getBodyPartsText(req) ;
-        String customDesignMessage = customDesignTattoo != null && customDesignTattoo ? """
-                <div style="background-color: whitesmoke; width: 90%%; justify-self:center;margin:auto; height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; ">
-                    <p style="margin:10px; display:block; "><i>%s</i></p>
-                </div>
-                """.formatted(req.getCustomDesignTattooText()) : "";
+            String customDesignMessage = getCustomDesignMessageAll(req, customDesignTattoo);
 
             String finalPriceText = getFinalPriceText(req, nf, formattedPriceSUM);
 
@@ -244,7 +237,6 @@ public class MailService {
                         <td style="padding: 12px; border: 1px solid #680E14;">%s</td>
                         </tr>
                         </table>
-
                         <div>
                         </div>
                         </div>
@@ -270,6 +262,75 @@ public class MailService {
                 );
             }
         }
+
+    private static @NonNull String getCustomDesignMessageAll(SendMailReq req, List<Boolean> customDesignTattoo) {
+
+        List<Integer> indicies =  new ArrayList<>();
+        for(int i = 0; i < customDesignTattoo.size(); i++) {
+            if(customDesignTattoo.get(i)) indicies.add(i);
+        }
+        var customDesignMessageCount = indicies.size();
+        return !indicies.isEmpty() ?  switch (customDesignMessageCount) {
+            case 1 -> """
+                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">1.: <i>%s</i></p>
+                    </div>
+                    """.formatted(req.getCustomDesignTattooText().get(indicies.get(0)));
+            case 2 -> """
+                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">1.: <i>%s</i></p>
+                    </div>
+                    <br/>
+                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">2.: <i>%s</i></p>
+                    </div>
+                    """.formatted(
+                    req.getCustomDesignTattooText().get(indicies.get(0)),
+                    req.getCustomDesignTattooText().get(indicies.get(1))
+            );
+            case 3 -> """
+                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">1.: <i>%s</i></p>
+                    </div>
+                    <br/>
+                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">2.: <i>%s</i></p>
+                    </div>
+                    <br/>
+                     <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">3.: <i>%s</i></p>
+                    </div>
+                    """.formatted(
+                    req.getCustomDesignTattooText().get(indicies.get(0)),
+                    req.getCustomDesignTattooText().get(indicies.get(1)),
+                    req.getCustomDesignTattooText().get(indicies.get(2))
+
+            );
+            case 4 -> """
+                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">1.: <i>%s</i></p>
+                    </div>
+                    <br/>
+                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">2.: <i>%s</i></p>
+                    </div>
+                     <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">3.: <i>%s</i></p>
+                    </div>
+                    <br/>
+                    <div style="background-color: whitesmoke; width: 90%%;margin:auto ;height: 150px; overflow: hidden; padding: 5px; border-radius:10px; word-wrap:break-word;overflow-wrap: break-word; margin-top:20px">
+                        <p style="margin:10px; display:block; ">4.: <i>%s</i></p>
+                    </div>
+                    """.formatted(
+                    req.getCustomDesignTattooText().get(indicies.get(0)),
+                    req.getCustomDesignTattooText().get(indicies.get(1)),
+                    req.getCustomDesignTattooText().get(indicies.get(2)),
+                    req.getCustomDesignTattooText().get(indicies.get(3))
+            );
+            default -> """
+                    """;
+        } : "" ;
+    }
 
     private static @NonNull StringBuilder getBodyPartsText(SendMailReq req) {
         List<String> bodyParts = req.getBodyParts();
@@ -301,7 +362,7 @@ public class MailService {
         }
 
         StringBuilder finalPriceText = new StringBuilder();
-        boolean largeTattoo = req.getLargeTattoo()!=null && req.getLargeTattoo();
+        boolean largeTattoo = !req.getLargeTattoo().isEmpty();
 
         if(!req.getTattooRefference().isEmpty() && !largeTattoo){
             finalPriceText.append(formattedPriceSUM);
@@ -330,13 +391,16 @@ public class MailService {
 
     private void addAttachments(SendMailReq req, MimeMessageHelper helper) throws MessagingException, IOException {
         if (!req.getTattooRefference().isEmpty()) {
-            for (int i = 0; i < req.getTattooRefference().size(); i++) {
-                helper.addAttachment(
-                        "TetoválásReferencia_" + i + "." + Objects.requireNonNull(req.getTattooRefference().get(i).getContentType()).substring(6).strip(),
-                        new ByteArrayDataSource(
-                                req.getTattooRefference().get(i).getBytes(),
-                                req.getTattooRefference().get(i).getContentType()
-                        ));
+            var i = 0;
+            for (List<MultipartFile> files : req.getTattooRefference()) {
+                for (MultipartFile file : files){
+                    helper.addAttachment(
+                            "TetoválásReferencia_" + i++ + "." + Objects.requireNonNull(file.getContentType()).substring(6).strip(),
+                            new ByteArrayDataSource(
+                                    file.getBytes(),
+                                    file.getContentType()
+                            ));
+                }
             }
         }
     }

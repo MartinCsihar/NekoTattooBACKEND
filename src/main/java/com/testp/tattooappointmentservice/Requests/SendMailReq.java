@@ -18,7 +18,7 @@ public class SendMailReq {
     private String appId;
     private String firstName;
     private String lastName;
-    private List<MultipartFile> tattooRefference;
+    private List<List<MultipartFile>> tattooRefference;
     private LocalDate appDate;
     private LocalTime appTime;
     private List<Integer> price;
@@ -27,7 +27,7 @@ public class SendMailReq {
     private List<Double> width;
     private String phoneNumber;
     private String email;
-    private Boolean largeTattoo;
-    private Boolean customDesignTattoo;
-    private String customDesignTattooText;
+    private List<Boolean> largeTattoo;
+    private List<Boolean> customDesignTattoo;
+    private List<String> customDesignTattooText;
 }

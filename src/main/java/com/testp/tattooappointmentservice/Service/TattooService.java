@@ -4,7 +4,9 @@ import com.azure.ai.openai.OpenAIClient;
 import com.azure.ai.openai.models.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.testp.tattooappointmentservice.Enums.TattooStyle;
 import com.testp.tattooappointmentservice.Models.TattooAppointment;
+import com.testp.tattooappointmentservice.Models.TattooData;
 import com.testp.tattooappointmentservice.Repository.TattooRepo;
 import com.testp.tattooappointmentservice.Requests.GetPriceQuoteForCustomTattooReq;
 import com.testp.tattooappointmentservice.Requests.GetPriceQuoteReq;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -31,30 +34,39 @@ public class TattooService {
     private final MailService mailService;
 
     public Object saveTattooAppointment(TattooAppointmentReq req) throws MessagingException, IOException {
+        List<String> bodyParts = req.getTattooData().stream().map(TattooData::getBodyPart).toList();
+        List<Integer> prices = req.getTattooData().stream().map(TattooData::getTattooPrice).toList();
+        List<Double> widths = req.getTattooData().stream().map(TattooData::getWidth).toList();
+        List<Double> heights = req.getTattooData().stream().map(TattooData::getHeight).toList();
+        List<List<MultipartFile>> refs = req.getTattooData().stream().map(TattooData::getTattooRefferences).toList();
+        List<Boolean> isLargeTattoo = req.getTattooData().stream().map(TattooData::getLargeTattoo).toList();
+        List<Boolean> isCustomDesignTattoo = req.getTattooData().stream().map(TattooData::getCustomDesignTattoo).toList();
+        List<String> customDesignTattooTexts = req.getTattooData().stream().map(TattooData::getCustomDesignTattooText).toList();
+
         TattooAppointment appointment = TattooAppointment.builder()
                 .email(req.getEmail())
                 .phoneNumber(req.getPhoneNumber())
                 .lastName(req.getLastName())
                 .firstName(req.getFirstName())
-                .style(req.getStyle())
-                .bodyParts(req.getBodyParts())
-                .tattooPrice(req.getTattooPrice())
+                .style(TattooStyle.black)
+                .bodyParts(bodyParts)
+                .tattooPrice(prices)
                 .build();
         repo.save(appointment);
         SendMailReq smr = SendMailReq.builder()
                 .appId(appointment.getAppId())
-                .bodyParts(req.getBodyParts())
+                .bodyParts(bodyParts)
                 .lastName(req.getLastName())
                 .firstName(req.getFirstName())
-                .price(req.getTattooPrice())
-                .width(req.getWidth())
-                .height(req.getHeight())
-                .tattooRefference(req.getTattooRefferences())
+                .price(prices)
+                .width(widths)
+                .height(heights)
+                .tattooRefference(refs)
                 .phoneNumber(req.getPhoneNumber())
                 .email(req.getEmail())
-                .largeTattoo(req.getLargeTattoo())
-                .customDesignTattoo(req.getCustomDesignTattoo())
-                .customDesignTattooText(req.getCustomDesignTattooText())
+                .largeTattoo(isLargeTattoo)
+                .customDesignTattoo(isCustomDesignTattoo)
+                .customDesignTattooText(customDesignTattooTexts)
                 .build();
 
         mailService.sendMeMail(smr);
@@ -124,11 +136,10 @@ public class TattooService {
         var finalHeight = height != null ? height.toString() + " cm" : "Nincs megadva, meg kell becsülni";
         var finalArea = height !=null && width != null ? height*width : "Nincs megadva, ki kell számolni!";
         return """
-                Elemezd a tetoválás fényképét és a vendég által megadott méreteket (cm), amennyiben megadta, ha nem adta meg (Amikor ez a szöveg van a méretadatok mellett: 'Nincs megadva, meg kell becsülni', akkor a pontosan becsüld meg a kép alapján, és azzal dolgozz.
+                Elemezd a tetoválás fényképét és a vendég által megadott méreteket (cm), amennyiben megadta, ha nem adta meg, amikor ez a szöveg van a méretadatok mellett: 'Nincs megadva, meg kell becsülni', akkor azt pontosan becsüld meg a kép alapján, és azzal dolgozz.
                 
                               A feladatod: a tetoválás kategorizálása és az ár kiszámítása a következő árlista alapján.
                               A számítás során kizárólag a megadott árlistát használhatod.
-                              Ne interpolálj, ne becsülj, ne módosíts árakat.
                               Méretadatok:
                                - magasság: %s
                                - szélesség: %s

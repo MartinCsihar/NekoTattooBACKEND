@@ -1,6 +1,7 @@
 package com.testp.tattooappointmentservice.Requests;
 
 import com.testp.tattooappointmentservice.Enums.TattooStyle;
+import com.testp.tattooappointmentservice.Models.TattooData;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,13 +21,14 @@ public class TattooAppointmentReq {
     private String phoneNumber;
     private String lastName;
     private String firstName;
-    private List<Double> width;
-    private List<Double> height;
-    private TattooStyle style;
-    private List<String> bodyParts;
-    private List<Integer> tattooPrice;
-    private List<MultipartFile> tattooRefferences;
-    private Boolean largeTattoo; //When tattoo is bigger than 600cm2
-    private Boolean customDesignTattoo;
-    private String customDesignTattooText;
+//    private List<Double> width;
+//    private List<Double> height;
+//    private TattooStyle style;
+//    private List<String> bodyParts;
+//    private List<Integer> tattooPrice;
+//    private List<MultipartFile> tattooRefferences;
+//    private Boolean largeTattoo; //When tattoo is bigger than 600cm2
+//    private Boolean customDesignTattoo;
+//    private String customDesignTattooText;
+    private List<TattooData> tattooData;
 }

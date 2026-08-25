@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -132,14 +131,16 @@ public class TattooService {
     }
 
     private String buildNormalPrompt(Double height, Double width, Double area) {
-        var finalWidth = width != null ? width.toString() + " cm" : "Nincs megadva, meg kell becsülni";
-        var finalHeight = height != null ? height.toString() + " cm" : "Nincs megadva, meg kell becsülni";
-        var finalArea = height !=null && width != null ? height*width : "Nincs megadva, ki kell számolni!";
+        var finalWidth = width != null && width != 0 ? width.toString() + " cm" : "Nincs megadva, meg kell becsülni";
+        var finalHeight = height != null && height != 0 ? height.toString() + " cm" : "Nincs megadva, meg kell becsülni";
+        var finalArea = width != null && width != 0  && height != null && height != 0  ? height*width : "Nincs megadva, ki kell számolni!";
         return """
                 Elemezd a tetoválás fényképét és a vendég által megadott méreteket (cm), amennyiben megadta, ha nem adta meg, amikor ez a szöveg van a méretadatok mellett: 'Nincs megadva, meg kell becsülni', akkor azt pontosan becsüld meg a kép alapján, és azzal dolgozz.
                 
                               A feladatod: a tetoválás kategorizálása és az ár kiszámítása a következő árlista alapján.
                               A számítás során kizárólag a megadott árlistát használhatod.
+                              HA BECSÜLNÖD KELLETT A MÉRETEKET, ÉS íGY A TERÜLET NAGYOBB MINT 600 cm² AKKOR NE KATEGORIZÁLJ, HANEM UGORJ A VÉGÉRE ÉS RAKD ÖSSZE A JSON VÁLASZT, MELYBEN A 'price' ÉRTÉKE LEGYEN 0!
+                
                               Méretadatok:
                                - magasság: %s
                                - szélesség: %s
@@ -282,20 +283,24 @@ public class TattooService {
     }
 
     private String buildCustomPrompt(String customText, Double width, Double height) {
-        var tattooHeight = height != 0 ? height + " cm" : "Nincs megadva, meg kell becsülni";
-        var tattooWidth = width != 0 ? width + " cm" : "Nincs megadva, meg kell becsülni";
+        var tattooWidth = width != null && width != 0 ? width.toString() + " cm" : "Nincs megadva, meg kell becsülni";
+        var tattooHeight = height != null && height != 0 ? height.toString() + " cm" : "Nincs megadva, meg kell becsülni";
         return """
                 Az ügyfél egy teljesen egyedileg tervezett tetkót szeretne, ennek érdekében képet/képeket is feltöltött majd írt egy megjegyzést, hogy hogyan tervezte el a designt!
-                Amennyiben az ügyfél megjegzése eltér a témától, irrealisztikus, vagy bármi ilyesmi, amit nem lehet teljesjteni, akkor add vissza a prompt végén lévő JSON-t úgy, 
+                Amennyiben az ügyfél megjegyzése eltér a témától, irrealisztikus, vagy bármi ilyesmi, amit nem lehet teljesjteni, akkor add vissza a prompt végén lévő JSON-t úgy,
                 hogy a reason mezőjébe beleírod, hogy nem megfelelő leírás, a többi mezőt pedig nullra állítod!
                 
                 
                 Elemezd a tetoválás képet/képeket és becsüld meg a tetoválás magasságát és szélességét (ha nem adta meg az ügyfél) az ügyfél megjegyzése és a képek alapján!
                 
                 A feladatod: a tetoválás kategorizálása és az ár kiszámítása a következő árlista alapján.
-                Az általad reálisan becsült méretekkel (szélesség, magasság) - az ügyfél megjegyzése alapján - számold ki a területet, majd ez alapján kategorizálj.
-                A számítás során kizárólag a megadott árlistát használhatod.
                 
+                Amennyiben szükséges, akkor az általad reálisan becsült méretekkel (szélesség, magasság) - az ügyfél megjegyzése alapján - számold ki a területet, majd ez alapján kategorizálj.
+                
+                HA BECSÜLNÖD KELLETT A MÉRETEKET, ÉS íGY A TERÜLET NAGYOBB MINT 600 cm² AKKOR NE KATEGORIZÁLJ, HANEM UGORJ A VÉGÉRE ÉS RAKD ÖSSZE A JSON VÁLASZT, MELYBEN A 'price' ÉRTÉKE LEGYEN 0!
+                
+                A számítás során kizárólag a megadott árlistát használhatod.
+               
                 Adatok:
                 -magasság: %s
                 -szélesség: %s
@@ -439,7 +444,7 @@ public class TattooService {
                 
                 A válasz mindig ugyanazt a struktúrát használja.
                 
-                """.formatted(customText,tattooHeight, tattooWidth );
+                """.formatted(customText,tattooHeight, tattooHeight);
     }
 
     public PriceQuoteForCustomTattooRes getPriceQuoteForCustomTattoo(GetPriceQuoteForCustomTattooReq req) throws JsonProcessingException {

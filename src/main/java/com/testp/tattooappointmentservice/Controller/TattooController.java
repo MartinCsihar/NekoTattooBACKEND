@@ -68,7 +68,7 @@ public class TattooController {
         response.addCookie(cookie);
     }
 
-    @GetMapping("/getPriceQuoteForCustomTattoo")
+    @PostMapping("/getPriceQuoteForCustomTattoo")
     public ResponseEntity<?> getCustomPriceQuote(@ModelAttribute GetPriceQuoteForCustomTattooReq req,
                                                  HttpServletRequest request,
                                                  HttpServletResponse response){

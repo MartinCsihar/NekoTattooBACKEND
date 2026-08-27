@@ -50,7 +50,10 @@ public class TattooController {
                 return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Napi limit elérve!");
             }
             PriceQuoteRes priceQuoteRes = tattooService.getPriceQuote(req);
-            incrementAndAddCookie(response, count);
+            if(priceQuoteRes.getPrice() != 0){
+                incrementAndAddCookie(response, count);
+            }
+
 
             return  ResponseEntity.ok(priceQuoteRes);
         }catch (Exception e){
@@ -86,11 +89,13 @@ public class TattooController {
                 return new ResponseEntity<>("Napi limit elérve!", HttpStatus.TOO_MANY_REQUESTS);
             }
             PriceQuoteForCustomTattooRes res = tattooService.getPriceQuoteForCustomTattoo(req);
-
-            incrementAndAddCookie(response, count);
+            if(res.getPrice() != 0){
+                incrementAndAddCookie(response, count);
+            }
 
             return  ResponseEntity.ok(res);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

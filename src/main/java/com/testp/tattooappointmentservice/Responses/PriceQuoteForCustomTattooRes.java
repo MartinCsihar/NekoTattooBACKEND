@@ -21,4 +21,6 @@ public class PriceQuoteForCustomTattooRes {
     private TattooCategory category;
     private Integer price;
     private String reason;
+    private Boolean notRealMeasure;
+    private Boolean wrongCustomText;
 }

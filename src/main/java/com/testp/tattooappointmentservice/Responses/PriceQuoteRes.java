@@ -24,4 +24,5 @@ public class PriceQuoteRes {
    private Boolean designNeeded;
    private Double estimatedWidth;
    private Double estimatedHeight;
+   private Boolean notRealMeasure;
 }

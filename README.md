@@ -1,9 +1,10 @@
 # Short description
-This repository contains the backend of my full‑stack application built with the ASP.NET Core framework.
+This repository contains the backend of my full‑stack application built with the Spring Boot framework.
 
 ## Technologies used:
-  - ASP.NET Core
+  - Spring Boot
   - Docker
+  - Java Mail Sender
   - PostgreSQL
   - GIT
   - Azure OpenAI

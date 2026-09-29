@@ -12,8 +12,14 @@ This repository contains the backend of my full‑stack application built with t
 
 ## License
 
+Copyright (c) 2026 Martin Csihar
+
 All rights reserved.
 
-This project is publicly available for portfolio and educational
-viewing purposes only. The source code may not be copied, modified,
-distributed, or reused without prior written permission.
+This source code is publicly available for portfolio and
+educational viewing purposes only.
+
+No permission is granted to copy, modify, distribute,
+reproduce, sublicense, sell, or otherwise use this source
+code or any part of it without prior written permission
+from the copyright holder.
